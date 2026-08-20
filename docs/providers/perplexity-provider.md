@@ -12,7 +12,7 @@ Sonar chat completions, direct or via OpenRouter (AI-synthesized answers with
 citations).
 
 <Note>
-This page covers the Perplexity **provider** setup. For the Perplexity **tool** (how the agent uses it), see [Perplexity search](/tools/perplexity-search).
+This page covers the Perplexity **provider** setup. For the Perplexity **tool** (how the agent uses it), see [Perplexity search](/tools/perplexity-search). To use Perplexity's **Agent API** as an LLM model provider (Claude, GPT, Gemini through one key), see [Perplexity Agent API](/providers/perplexity-agent-api).
 </Note>
 
 | Property    | Value                                                                  |
@@ -113,11 +113,14 @@ Native-only filters return a descriptive error on the chat-completions path.
 
 ## Related
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="Perplexity search tool" href="/tools/perplexity-search" icon="magnifying-glass">
     How the agent invokes Perplexity searches and interprets results.
   </Card>
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full configuration reference including plugin entries.
+  </Card>
+  <Card title="Perplexity Agent API" href="/providers/perplexity-agent-api" icon="robot">
+    Use Perplexity's Agent API as an LLM model provider for OpenClaw.
   </Card>
 </CardGroup>
