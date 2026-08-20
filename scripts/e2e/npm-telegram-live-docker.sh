@@ -533,8 +533,199 @@ if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
 fi
 
 export OPENCLAW_NPM_TELEGRAM_SUT_COMMAND="$sut_command"
+proof_dir="/app/${OPENCLAW_NPM_TELEGRAM_OUTPUT_DIR}/runtime-invariants"
+proof_log="$proof_dir/sut-calls.jsonl"
+shell_marker="$proof_dir/shell-startup-ran"
+bash_function_marker="$proof_dir/bash-function-ran"
+shell_startup="$proof_dir/shell-startup.sh"
+proof_sut_dir="/npm-global/qa-proof"
+proof_sut_command="$proof_sut_dir/openclaw"
+mkdir -p "$proof_dir" "$proof_sut_dir"
+cat >"$shell_startup" <<'PROOF_SHELL_STARTUP'
+printf 'shell startup env leaked\n' >"${OPENCLAW_QA_PROOF_SHELL_MARKER:?}"
+PROOF_SHELL_STARTUP
+chmod 0600 "$shell_startup"
+cat >"$proof_sut_command" <<'PROOF_LAUNCHER'
+#!/usr/bin/env bash
+set -euo pipefail
+
+for key in BASH_ENV BASHOPTS ENV SHELLOPTS; do
+  if compgen -e | grep -Fxq "$key"; then
+    echo "blocked shell startup env reached packaged SUT: $key" >&2
+    exit 97
+  fi
+done
+if compgen -e | grep -Eq '^BASH_FUNC_'; then
+  echo "exported Bash function reached packaged SUT" >&2
+  exit 98
+fi
+
+real_sut="${OPENCLAW_QA_PROOF_REAL_SUT_COMMAND:?}"
+proof_log="${OPENCLAW_QA_PROOF_LOG:?}"
+state_dir="${OPENCLAW_STATE_DIR:?}"
+config_path="${OPENCLAW_CONFIG_PATH:?}"
+canonical_config="$(dirname "$state_dir")/openclaw.json"
+auth_db="$state_dir/agents/qa/agent/openclaw-agent.sqlite"
+kind=gateway
+if [[ "${1:-}" == "models" && "${2:-}" == "auth" ]]; then
+  kind=auth
+fi
+
+path_id() {
+  printf '%s' "$1" | sha256sum | awk '{print $1}'
+}
+
+config_mode="$(stat -c '%a' "$config_path")"
+canonical_before="$(sha256sum "$canonical_config" | awk '{print $1}')"
+if [[ "$kind" == "auth" ]]; then
+  set +e
+  "$real_sut" "$@"
+  status="$?"
+  set -e
+  canonical_after="$(sha256sum "$canonical_config" | awk '{print $1}')"
+  db_exists=false
+  [[ -f "$auth_db" ]] && db_exists=true
+  node - "$proof_log" "$kind" "$(path_id "$config_path")" "$config_mode" \
+    "$(path_id "$canonical_config")" "$canonical_before" "$canonical_after" \
+    "$(path_id "$state_dir")" "$(path_id "$auth_db")" "$db_exists" <<'NODE'
+const fs = require("node:fs");
+const [
+  logPath,
+  kind,
+  configId,
+  configMode,
+  canonicalConfigId,
+  canonicalBefore,
+  canonicalAfter,
+  stateDirId,
+  authDbId,
+  dbExists,
+] = process.argv.slice(2);
+fs.appendFileSync(
+  logPath,
+  `${JSON.stringify({
+    kind,
+    configId,
+    configMode,
+    canonicalConfigId,
+    canonicalBefore,
+    canonicalAfter,
+    stateDirId,
+    authDbId,
+    dbExists: dbExists === "true",
+  })}\n`,
+);
+NODE
+  exit "$status"
+fi
+
+db_exists=false
+[[ -f "$auth_db" ]] && db_exists=true
+node - "$proof_log" "$kind" "$(path_id "$config_path")" "$config_mode" \
+  "$(path_id "$canonical_config")" "$canonical_before" "$canonical_before" \
+  "$(path_id "$state_dir")" "$(path_id "$auth_db")" "$db_exists" <<'NODE'
+const fs = require("node:fs");
+const [
+  logPath,
+  kind,
+  configId,
+  configMode,
+  canonicalConfigId,
+  canonicalBefore,
+  canonicalAfter,
+  stateDirId,
+  authDbId,
+  dbExists,
+] = process.argv.slice(2);
+fs.appendFileSync(
+  logPath,
+  `${JSON.stringify({
+    kind,
+    configId,
+    configMode,
+    canonicalConfigId,
+    canonicalBefore,
+    canonicalAfter,
+    stateDirId,
+    authDbId,
+    dbExists: dbExists === "true",
+  })}\n`,
+);
+NODE
+exec "$real_sut" "$@"
+PROOF_LAUNCHER
+chmod 0755 "$proof_sut_command"
+
+export OPENCLAW_NPM_TELEGRAM_SUT_COMMAND="$proof_sut_command"
+export OPENCLAW_QA_KEEP_TEMP=1
+export OPENCLAW_QA_PROOF_LOG="$proof_log"
+export OPENCLAW_QA_PROOF_REAL_SUT_COMMAND="$sut_command"
+export OPENCLAW_QA_PROOF_SHELL_MARKER="$shell_marker"
+export OPENCLAW_QA_PROOF_BASH_FUNC_MARKER="$bash_function_marker"
 trap - ERR
-tsx scripts/e2e/npm-telegram-live-runner.ts
+env \
+  'BASH_FUNC_compgen%%=() { printf "bash function env leaked\n" > "${OPENCLAW_QA_PROOF_BASH_FUNC_MARKER:?}"; builtin compgen "$@"; }' \
+  BASH_ENV="$shell_startup" \
+  BASHOPTS=checkwinsize \
+  ENV="$shell_startup" \
+  SHELLOPTS=braceexpand \
+  tsx scripts/e2e/npm-telegram-live-runner.ts
+
+test ! -e "$shell_marker"
+test ! -e "$bash_function_marker"
+node - "$proof_log" "$proof_dir/runtime-proof.txt" <<'NODE'
+const fs = require("node:fs");
+const [logPath, summaryPath] = process.argv.slice(2);
+const records = fs
+  .readFileSync(logPath, "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+const auth = records.filter((record) => record.kind === "auth");
+const gateway = records.filter((record) => record.kind === "gateway");
+if (auth.length !== 2 || gateway.length < 1) {
+  throw new Error(`expected two auth calls and at least one gateway call; got ${auth.length}/${gateway.length}`);
+}
+if (auth.some((record) => record.configMode !== "600")) {
+  throw new Error("packaged auth scratch config was not mode 0600");
+}
+if (auth.some((record) => record.canonicalBefore !== record.canonicalAfter)) {
+  throw new Error("packaged auth mutated the canonical config");
+}
+const all = [...auth, ...gateway];
+if (
+  new Set(all.map((record) => record.stateDirId)).size !== 1 ||
+  new Set(all.map((record) => record.authDbId)).size !== 1 ||
+  gateway.some((record) => !record.dbExists)
+) {
+  throw new Error("packaged auth and gateway did not share one SQLite auth store");
+}
+if (
+  new Set(auth.map((record) => record.configId)).size !== 1 ||
+  auth.some((record) => record.configId === record.canonicalConfigId) ||
+  gateway.some((record) => record.configId !== record.canonicalConfigId)
+) {
+  throw new Error("packaged auth scratch and canonical config ownership diverged");
+}
+fs.writeFileSync(
+  summaryPath,
+  [
+    "shell_startup_marker_absent=true",
+    "shell_startup_env_scrubbed=true",
+    "bash_function_marker_absent=true",
+    "bash_function_env_scrubbed=true",
+    "scratch_auth_config_mode=0600",
+    "canonical_config_unchanged=true",
+    "shared_sqlite_auth_store=true",
+    `auth_calls=${auth.length}`,
+    `gateway_calls=${gateway.length}`,
+    "",
+  ].join("\n"),
+);
+fs.rmSync(logPath);
+NODE
+cat "$proof_dir/runtime-proof.txt"
 EOF
 
 echo "package Telegram live Docker E2E passed ($PACKAGE_LABEL)"
