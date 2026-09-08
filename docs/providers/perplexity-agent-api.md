@@ -13,14 +13,14 @@ Perplexity's [Agent API](https://docs.perplexity.ai/docs/agent-api/quickstart) e
 This page covers Perplexity as a **model provider** and as an **MCP server**. For Perplexity as OpenClaw's **web search provider** (managed by the `@openclaw/perplexity-plugin` package), see [Perplexity](/providers/perplexity-provider).
 </Note>
 
-| Property     | Value                                                                    |
-| ------------ | ------------------------------------------------------------------------ |
-| Type         | Model provider (custom OpenAI-Responses backend)                         |
-| API          | `openai-responses`                                                       |
-| Base URL     | `https://api.perplexity.ai/v1`                                           |
-| Auth         | `PERPLEXITY_API_KEY` (Perplexity API key, prefix `pplx-`)                |
-| Get a key    | [console.perplexity.ai](https://console.perplexity.ai/project/keys)      |
-| Provider ID  | `perplexity` (recommended; passed via `--custom-provider-id`)            |
+| Property    | Value                                                               |
+| ----------- | ------------------------------------------------------------------- |
+| Type        | Model provider (custom OpenAI-Responses backend)                    |
+| API         | `openai-responses`                                                  |
+| Base URL    | `https://api.perplexity.ai/v1`                                      |
+| Auth        | `PERPLEXITY_API_KEY` (Perplexity API key, prefix `pplx-`)           |
+| Get a key   | [console.perplexity.ai](https://console.perplexity.ai/project/keys) |
+| Provider ID | `perplexity` (recommended; passed via `--custom-provider-id`)       |
 
 ## Required configuration
 
@@ -88,6 +88,7 @@ See Perplexity's [OpenClaw integration guide](https://docs.perplexity.ai/docs/ge
     ```
 
     The state-directory `.env` is a trusted, durable environment source for installed Gateway services; a shell export alone disappears when that shell exits. See [Environment variables](/help/environment) for the full loading and precedence rules.
+
   </Step>
   <Step title="Run onboarding">
     If `CUSTOM_API_KEY` was unused and you chose the first credential path above, run:
@@ -133,6 +134,7 @@ See Perplexity's [OpenClaw integration guide](https://docs.perplexity.ai/docs/ge
     `--secret-input-mode ref` tells OpenClaw to write an environment reference to `openclaw.json` instead of the literal key. On a default secrets setup, the first path persists `apiKey: { source: "env", provider: "default", id: "CUSTOM_API_KEY" }`; when an environment SecretRef provider alias is configured, `provider` contains that resolved alias instead. The daemon reads the referenced variable from its runtime environment on each request. The existing-custom-provider path replaces the onboarding result with the complete, provider-specific `{ source: "env", provider: "<env-provider-alias>", id: "PERPLEXITY_API_KEY" }` reference before installing the daemon; the command above uses the built-in `default` alias.
 
     `--custom-compatibility openai-responses` is required. Perplexity's Agent API primary endpoint is `POST /v1/agent`; it also accepts requests at `POST /v1/responses` as an OpenAI-Responses-compatible alias, which is what OpenClaw uses in this mode. It does not implement `/v1/chat/completions`, so `openai-completions` will not work.
+
   </Step>
   <Step title="Apply the required configuration">
     Edit `openclaw.json` (run `openclaw config file` to locate it) and add:
@@ -148,6 +150,7 @@ See Perplexity's [OpenClaw integration guide](https://docs.perplexity.ai/docs/ge
     ```
 
     See [Required configuration](#required-configuration) above for context and [Reserved tool names](#reserved-tool-names) for the full list.
+
   </Step>
   <Step title="Add the models you need">
     Onboarding wires up one model. To make additional Agent API models available, add explicit entries under `models.providers.perplexity.models[]`. `agents.defaults.models` is for aliases and per-model settings on already-registered models, not for registering new ones. See [Config example](#config-example) below for a working entry shape. The full model list, current pricing, and per-model context windows are published at [docs.perplexity.ai/docs/getting-started/models](https://docs.perplexity.ai/docs/getting-started/models).
@@ -184,7 +187,7 @@ See Perplexity's [OpenClaw integration guide](https://docs.perplexity.ai/docs/ge
             api: "openai-responses",
             reasoning: false,
             input: ["text"],
-            cost: { input: 3.00, output: 15.00, cacheRead: 0.30, cacheWrite: 0 },
+            cost: { input: 3.0, output: 15.0, cacheRead: 0.3, cacheWrite: 0 },
             contextWindow: 200000,
             maxTokens: 16384,
           },
@@ -241,6 +244,7 @@ Because the CLI is invoked from a shell, agents running under OpenClaw's `exec` 
     | `https://api.perplexity.ai/v1` | `https://api.perplexity.ai/v1/agent` (OpenClaw would call `/v1/agent/responses` and get `405 Method Not Allowed`) |
     | | `https://api.perplexity.ai/v1/responses` (OpenClaw would call `/v1/responses/responses` and get `404`) |
     | | `https://api.perplexity.ai` (missing `/v1`; requests hit `/responses` and get `404`) |
+
   </Accordion>
 
   <Accordion title="Model ID format">
@@ -248,6 +252,7 @@ Because the CLI is invoked from a shell, agents running under OpenClaw's `exec` 
 
     - Config model ID: `anthropic/claude-sonnet-4-6`
     - Full model reference: `perplexity/anthropic/claude-sonnet-4-6`
+
   </Accordion>
 
 </AccordionGroup>
