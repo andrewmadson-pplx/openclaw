@@ -32,8 +32,9 @@ OpenClaw's managed `web_search` provider, see
 
 Perplexity Agent API owns server-side built-in tools. The non-interactive
 onboarding flow below makes the selected Perplexity model the shared default.
-For that setup, disable OpenClaw's managed `web_search` Gateway-wide so no agent
-using the default sends a custom function whose name Perplexity reserves:
+Before running it, disable OpenClaw's managed `web_search` Gateway-wide so no
+agent using the new default sends a custom function whose name Perplexity
+reserves:
 
 ```json5
 {
@@ -46,9 +47,10 @@ using the default sends a custom function whose name Perplexity reserves:
 ```
 
 `tools.web.search.enabled: false` affects every agent on the Gateway. If other
-agents still need managed search, first restore `agents.defaults.model.primary`
-to its previous non-Perplexity model. Then assign the Perplexity model and deny
-rule to the same real agent ID (replace `research` if your agent has another ID):
+agents still need managed search, keep the Gateway-wide disable in place while
+you restore `agents.defaults.model.primary` to its previous non-Perplexity
+model. Then assign the Perplexity model and deny rule to the same real agent ID
+(replace `research` if your agent has another ID):
 
 ```json5
 {
@@ -62,6 +64,8 @@ rule to the same real agent ID (replace `research` if your agent has another ID)
   },
 }
 ```
+
+Re-enable Gateway-wide managed search only after both scoped fields are active.
 
 <Warning>
 Do not combine a shared Perplexity default with a deny rule on only one named
@@ -129,6 +133,19 @@ for the vendor-owned contract.
 
   </Step>
 
+  <Step title="Disable managed search before changing the default">
+    Apply the Gateway-wide guard before onboarding changes the shared model:
+
+    ```bash
+    openclaw config set tools.web.search.enabled false
+    ```
+
+    Leave this disabled for a shared-default Perplexity setup. To narrow the
+    setup later, keep it disabled through the model and deny-rule edits, then
+    re-enable it only after those paired edits are active.
+
+  </Step>
+
   <Step title="Run non-interactive onboarding">
     For a fresh `CUSTOM_API_KEY`, run:
 
@@ -177,14 +194,6 @@ for the vendor-owned contract.
     setup dispatch. `--secret-input-mode ref` stores a complete environment
     SecretRef instead of a literal key.
 
-  </Step>
-
-  <Step title="Apply the tool rule">
-    Because onboarding writes the selected model as the shared default, apply
-    the Gateway-wide disable from
-    [Required tool configuration](#required-tool-configuration). Use the paired
-    per-agent model and deny rule only after restoring the previous shared
-    default.
   </Step>
 
   <Step title="Register additional models">
