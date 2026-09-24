@@ -30,24 +30,10 @@ OpenClaw's managed `web_search` provider, see
 
 ## Required tool configuration
 
-Perplexity Agent API owns server-side built-in tools. Disable OpenClaw's managed
-`web_search` for an agent using this provider so OpenClaw does not send a custom
-function whose name is reserved by Perplexity:
-
-```json5
-{
-  agents: {
-    entries: {
-      perplexity: {
-        tools: { deny: ["web_search"] },
-      },
-    },
-  },
-}
-```
-
-If every agent on the Gateway uses Perplexity Agent API, you can instead disable
-managed search Gateway-wide:
+Perplexity Agent API owns server-side built-in tools. The non-interactive
+onboarding flow below makes the selected Perplexity model the shared default.
+For that setup, disable OpenClaw's managed `web_search` Gateway-wide so no agent
+using the default sends a custom function whose name Perplexity reserves:
 
 ```json5
 {
@@ -59,10 +45,29 @@ managed search Gateway-wide:
 }
 ```
 
+`tools.web.search.enabled: false` affects every agent on the Gateway. If other
+agents still need managed search, first restore `agents.defaults.model.primary`
+to its previous non-Perplexity model. Then assign the Perplexity model and deny
+rule to the same real agent ID (replace `research` if your agent has another ID):
+
+```json5
+{
+  agents: {
+    entries: {
+      research: {
+        model: "perplexity/anthropic/claude-sonnet-4-6",
+        tools: { deny: ["web_search"] },
+      },
+    },
+  },
+}
+```
+
 <Warning>
-`tools.web.search.enabled: false` affects every agent on the Gateway. Use the
-per-agent deny rule when other agents still need managed `web_search`, or run the
-Perplexity agent in a separate Gateway profile.
+Do not combine a shared Perplexity default with a deny rule on only one named
+agent. Every other agent inheriting that default would still expose the reserved
+function name. Scope the model and deny rule together, use the Gateway-wide
+disable, or run the Perplexity agent in a separate Gateway profile.
 </Warning>
 
 Perplexity reserves these custom-function names for its built-in tools:
@@ -175,9 +180,11 @@ for the vendor-owned contract.
   </Step>
 
   <Step title="Apply the tool rule">
-    Add the per-agent deny rule from
-    [Required tool configuration](#required-tool-configuration), or use the
-    Gateway-wide disable only when its broader scope is intentional.
+    Because onboarding writes the selected model as the shared default, apply
+    the Gateway-wide disable from
+    [Required tool configuration](#required-tool-configuration). Use the paired
+    per-agent model and deny rule only after restoring the previous shared
+    default.
   </Step>
 
   <Step title="Register additional models">
@@ -243,10 +250,10 @@ shape is:
     defaults: {
       model: { primary: "perplexity/anthropic/claude-sonnet-4-6" },
     },
-    entries: {
-      perplexity: {
-        tools: { deny: ["web_search"] },
-      },
+  },
+  tools: {
+    web: {
+      search: { enabled: false },
     },
   },
   models: {

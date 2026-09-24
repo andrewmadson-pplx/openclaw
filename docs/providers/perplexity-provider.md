@@ -86,11 +86,13 @@ Perplexity's separate `/v1/async/sonar` endpoints. Agent API uses
 
 Perplexity's public migration guide recommends Agent API for new integrations
 and currently publishes a September 27, 2026 "supported until" notice for
-Sonar. Perplexity has also confirmed that selecting Sonar for non-async requests
-continues after that date through automatic server-side routing to an Agent API
-preset; only the async Sonar endpoints fully discontinue. Automatic routing
-preserves request continuity, not identical parameters, results, latency,
-pricing, or features.
+Sonar. Separately, Perplexity's API owner confirmed on September 24 that
+selecting Sonar for non-async requests continues after that date through
+automatic server-side routing to an Agent API preset; only the async Sonar
+endpoints fully discontinue. This is owner-confirmed future rollout policy, not
+behavior stated in the current public migration pages or observable in
+OpenClaw's current transport. Automatic routing preserves request continuity,
+not identical parameters, results, latency, pricing, or features.
 
 ## Native API filtering
 

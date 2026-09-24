@@ -41,12 +41,14 @@ OpenClaw. Credential precedence is a configured `webSearch.apiKey`, then
 
 OpenClaw's direct path calls synchronous
 `POST https://api.perplexity.ai/chat/completions`; it does not use
-`/v1/async/sonar`. Perplexity has confirmed that non-async Sonar selections
-continue after September 27, 2026 through automatic server-side routing to an
-Agent API preset. Only the separate async Sonar endpoints fully discontinue on
-that date. Agent API itself uses `POST /v1/agent`, with `POST /v1/responses` as
-its OpenAI Responses alias. Automatic routing does not promise identical
-parameters, results, latency, pricing, or features.
+`/v1/async/sonar`. Separately, Perplexity's API owner confirmed on September 24
+that non-async Sonar selections continue after September 27 through automatic
+server-side routing to an Agent API preset. Only the separate async Sonar
+endpoints fully discontinue on that date. This is owner-confirmed future rollout
+policy, not behavior stated in the current public migration pages or observable
+in OpenClaw's current transport. Agent API itself uses `POST /v1/agent`, with
+`POST /v1/responses` as its OpenAI Responses alias. Automatic routing does not
+promise identical parameters, results, latency, pricing, or features.
 
 OpenRouter is a third-party transport. That direct Perplexity continuity does
 not guarantee future OpenRouter availability or behavior; check
