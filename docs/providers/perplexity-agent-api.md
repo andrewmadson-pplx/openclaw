@@ -31,10 +31,13 @@ OpenClaw's managed `web_search` provider, see
 ## Required tool configuration
 
 Perplexity Agent API owns server-side built-in tools. The non-interactive
-onboarding flow below makes the selected Perplexity model the shared default.
-Before running it, disable OpenClaw's managed `web_search` Gateway-wide so no
-agent using the new default sends a custom function whose name Perplexity
-reserves:
+onboarding flow below makes the selected Perplexity model the shared default on
+a Gateway without explicit ownership. On a fleet with
+`agents.ownership: "explicit"`, it changes only the configured system agent.
+Before running it, apply the tool guard at that same scope so the agent receiving
+the model does not send a custom function whose name Perplexity reserves.
+
+For a shared default, disable OpenClaw's managed `web_search` Gateway-wide:
 
 ```json5
 {
@@ -46,18 +49,16 @@ reserves:
 }
 ```
 
-`tools.web.search.enabled: false` affects every agent on the Gateway. If other
-agents still need managed search, keep the Gateway-wide disable in place while
-you restore `agents.defaults.model.primary` to its previous non-Perplexity
-model. Then assign the Perplexity model and deny rule to the same real agent ID
-(replace `research` if your agent has another ID):
+`tools.web.search.enabled: false` affects every agent on the Gateway. For an
+explicit fleet, preserve managed search for unrelated agents and add
+`web_search` to the system agent's existing deny list before onboarding (replace
+`research` with the value of `agents.defaults.systemAgent.agentId`):
 
 ```json5
 {
   agents: {
     entries: {
       research: {
-        model: "perplexity/anthropic/claude-sonnet-4-6",
         tools: { deny: ["web_search"] },
       },
     },
@@ -65,7 +66,9 @@ model. Then assign the Perplexity model and deny rule to the same real agent ID
 }
 ```
 
-Re-enable Gateway-wide managed search only after both scoped fields are active.
+Onboarding writes the Perplexity model to that same explicit agent. Do not use
+the Gateway-wide disable for this path unless you intend to disable managed
+search for every agent.
 
 <Warning>
 Do not combine a shared Perplexity default with a deny rule on only one named
@@ -133,16 +136,47 @@ for the vendor-owned contract.
 
   </Step>
 
-  <Step title="Disable managed search before changing the default">
-    Apply the Gateway-wide guard before onboarding changes the shared model:
+  <Step title="Guard the model owner before onboarding">
+    Inspect the Gateway's ownership mode:
+
+    ```bash
+    openclaw config get agents.ownership
+    ```
+
+    When ownership is unset, onboarding changes the shared default. Apply the
+    Gateway-wide guard first and leave it disabled while Perplexity remains the
+    shared default:
 
     ```bash
     openclaw config set tools.web.search.enabled false
     ```
 
-    Leave this disabled for a shared-default Perplexity setup. To narrow the
-    setup later, keep it disabled through the model and deny-rule edits, then
-    re-enable it only after those paired edits are active.
+    When the value is `explicit`, onboarding changes the configured system
+    agent instead. Read its ID:
+
+    ```bash
+    openclaw config get agents.defaults.systemAgent.agentId
+    ```
+
+    Before onboarding, edit that agent's `tools.deny` list to include
+    `web_search`, preserving any existing entries. For example, for an agent ID
+    of `research`:
+
+    ```json5
+    {
+      agents: {
+        ownership: "explicit",
+        defaults: { systemAgent: { agentId: "research" } },
+        entries: {
+          research: { tools: { deny: ["web_search"] } },
+        },
+      },
+    }
+    ```
+
+    This scoped guard leaves managed search available to unrelated agents. Do
+    not apply the Gateway-wide disable in an explicit fleet unless that broader
+    effect is intentional.
 
   </Step>
 
@@ -250,8 +284,8 @@ payloads. Selecting `openai-completions` sends a different request to
 
 ## Config shape
 
-Onboarding writes the full provider and starter-model metadata. The important
-shape is:
+Onboarding writes the full provider and starter-model metadata. For the shared-
+default path, the important shape is:
 
 ```json5
 {
