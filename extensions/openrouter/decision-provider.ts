@@ -28,7 +28,11 @@ export function isOpenRouterDecisionModel(modelId: string): boolean {
   return (
     modelId === "typesafe/jev-1.13" ||
     modelId === "typesafe/jev-1.14" ||
-    modelId === "~typesafe/jev-latest"
+    modelId === "~typesafe/jev-latest" ||
+    modelId === "perplexity/pplx-decider-v1.2" ||
+    modelId === "perplexity/pplx-decider-flash-v1.2" ||
+    modelId === "~perplexity/pplx-decider-latest" ||
+    modelId === "~perplexity/pplx-decider-flash-latest"
   );
 }
 
@@ -40,8 +44,9 @@ function supportsBatch(batch: DecisionBatchV2, modelId: string): boolean {
   if (!validateDecisionBatchV2(batch)) {
     return false;
   }
-  // Jev accepts PNG/JPEG only. The shared validator bounds and checks inline data;
-  // neither this adapter nor the host fetches image URLs or resizes caller evidence.
+  // Send PNG/JPEG only: the formats every listed model accepts.
+  // The shared validator bounds and checks inline data; neither this adapter nor
+  // the host fetches image URLs or resizes caller evidence.
   if (
     batch.state.type !== "image" &&
     batch.state.type !== "text" &&
@@ -62,7 +67,7 @@ function supportsBatch(batch: DecisionBatchV2, modelId: string): boolean {
       return false;
     }
     if (q.type === "box") {
-      return modelId !== "typesafe/jev-1.13";
+      return modelId === "typesafe/jev-1.14" || modelId === "~typesafe/jev-latest";
     }
     if (q.type === "choice") {
       return Object.keys(q.criteria).length <= 255;

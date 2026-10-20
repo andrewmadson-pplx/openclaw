@@ -371,7 +371,7 @@ it.each([
   },
 );
 
-it("projects the declared Jev routes as decision-only without fabricated chat fields", () => {
+it("projects the declared decision routes as decision-only without fabricated chat fields", () => {
   const manifest = readOpenRouterManifest();
   const catalog = manifest.modelCatalog;
   const providerCatalog = catalog?.providers?.openrouter;
@@ -384,7 +384,11 @@ it("projects the declared Jev routes as decision-only without fabricated chat fi
     source: "manifest",
   });
   expect(rows.map((row) => row.id)).toEqual([
+    "~perplexity/pplx-decider-flash-latest",
+    "~perplexity/pplx-decider-latest",
     "~typesafe/jev-latest",
+    "perplexity/pplx-decider-flash-v1.2",
+    "perplexity/pplx-decider-v1.2",
     "typesafe/jev-1.13",
     "typesafe/jev-1.14",
   ]);
@@ -400,7 +404,9 @@ it("projects the declared Jev routes as decision-only without fabricated chat fi
         image: { maxBytes: 4194304, mimeTypes: ["image/png", "image/jpeg"], remoteUrls: false },
       },
     });
-    expect(Boolean(row.inference?.decision?.questions?.box)).toBe(row.id !== "typesafe/jev-1.13");
+    expect(Boolean(row.inference?.decision?.questions?.box)).toBe(
+      row.id === "typesafe/jev-1.14" || row.id === "~typesafe/jev-latest",
+    );
   }
   const conversational = buildAllowedModelSet({
     cfg: {},

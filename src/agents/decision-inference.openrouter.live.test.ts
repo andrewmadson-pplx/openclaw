@@ -30,7 +30,14 @@ function redSquareImage(): string {
   return `data:image/png;base64,${encodePngRgba(pixels, width, width).toString("base64")}`;
 }
 
-it.skipIf(!live).each(["typesafe/jev-1.13", "typesafe/jev-1.14"])(
+it
+  .skipIf(!live)
+  .each([
+    "typesafe/jev-1.13",
+    "typesafe/jev-1.14",
+    "perplexity/pplx-decider-v1.2",
+    "perplexity/pplx-decider-flash-v1.2",
+  ])(
   "evaluates native decisions with %s through the registered OpenClaw provider",
   { timeout: 60_000, retry: 0 },
   async (model) => {

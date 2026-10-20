@@ -125,6 +125,28 @@ it.each(["typesafe/jev-1.14", "~typesafe/jev-latest"])(
   },
 );
 
+it.each([
+  "perplexity/pplx-decider-v1.2",
+  "perplexity/pplx-decider-flash-v1.2",
+  "~perplexity/pplx-decider-latest",
+  "~perplexity/pplx-decider-flash-latest",
+])("sends Boolean, Choice and Score questions and refuses Box on %s", async (modelId) => {
+  const ctx = context();
+  ctx.model.id = modelId;
+  expect(await provider.evaluate(batch, ctx)).toMatchObject({ status: "ok" });
+  expect(readRequestBody()).toMatchObject({
+    model: modelId,
+    questions: { q: { type: "noul" }, c: { type: "choice" }, s: { type: "score" } },
+  });
+  vi.mocked(fetchWithSsrFGuard).mockClear();
+  const image: DecisionBatchV2 = {
+    state: { type: "image", dataUri: "data:image/png;base64,AA==" },
+    questions: { target: { type: "box", instructions: "the product" } },
+  };
+  await unavailable("unsupported-input", ctx, image);
+  expect(fetchWithSsrFGuard).not.toHaveBeenCalled();
+});
+
 it.each(["png", "jpeg"])("accepts %s evidence on Jev 1.13", async (format) => {
   const dataUri = `data:image/${format};base64,AA==`;
   expect(

@@ -200,6 +200,38 @@ models. See [Jev on OpenRouter](https://openrouter.ai/docs/guides/community/jev)
 and the [System One API](https://openrouter.ai/docs/api/api-reference/systemone/submit-a-system-one-request)
 for the upstream contract.
 
+## Typed decisions with Perplexity
+
+Perplexity's decision models use the same OpenRouter connection, route and
+adapter as Jev:
+
+```json5
+{
+  agents: {
+    defaults: { decisionModel: "openrouter/perplexity/pplx-decider-v1.2" },
+  },
+}
+```
+
+The canonical catalog includes `openrouter/perplexity/pplx-decider-v1.2`,
+`openrouter/perplexity/pplx-decider-flash-v1.2`,
+`openrouter/~perplexity/pplx-decider-latest`, and
+`openrouter/~perplexity/pplx-decider-flash-latest` as **decision-only** routes.
+The latest aliases can move to newer models. Revalidate your application's
+decision thresholds when the model changes.
+
+For these models, the OpenClaw adapter accepts text, structured JSON objects or
+arrays, or one inline PNG or JPEG image with optional text. They answer Boolean,
+Choice and Score questions, each with instructions; Box questions are rejected
+before inference. OpenClaw limits images to 4 MiB decoded and does not resize them.
+Perplexity also limits each image to 2,048 tiles of 32 × 32 pixels after rounding
+each dimension to the nearest multiple of 32 (for example, 1440 × 1440 or
+2048 × 1024). Perplexity documents an HTTP 504 after about a minute for larger
+images; OpenClaw reports a transport failure and may reach its deadline sooner.
+Input costs $0.02 per million tokens on `pplx-decider-v1.2` and $0.01 per million
+tokens on `pplx-decider-flash-v1.2`; output tokens are free. See the
+[Decisions API](https://docs.perplexity.ai/docs/decisions/quickstart) for upstream behavior.
+
 ## Image generation
 
 OpenRouter can back the `image_generate` tool. Set an OpenRouter image model
