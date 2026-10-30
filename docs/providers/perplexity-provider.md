@@ -10,6 +10,8 @@ The Perplexity plugin registers a `web_search` provider with two transports: the
 native Perplexity Search API (structured results with filters) and Perplexity
 Sonar chat completions, direct or via OpenRouter (AI-synthesized answers with
 citations).
+It also registers a `perplexity` memory embedding provider backed by the
+Perplexity Embeddings API.
 
 <Note>
 This page covers the Perplexity **provider** setup. For the Perplexity **tool** (how the agent uses it), see [Perplexity search](/tools/perplexity-search).
@@ -17,7 +19,7 @@ This page covers the Perplexity **provider** setup. For the Perplexity **tool** 
 
 | Property    | Value                                                                  |
 | ----------- | ---------------------------------------------------------------------- |
-| Type        | Web search provider (not a model provider)                             |
+| Type        | Web search and memory embedding provider (not a model provider)        |
 | Auth        | `PERPLEXITY_API_KEY` (native) or `OPENROUTER_API_KEY` (via OpenRouter) |
 | Config path | `plugins.entries.perplexity.config.webSearch.apiKey`                   |
 | Overrides   | `plugins.entries.perplexity.config.webSearch.baseUrl` / `.model`       |
@@ -110,6 +112,22 @@ Native-only filters return a descriptive error on the chat-completions path.
     (prefix `sk-or-`) instead of a native Perplexity key. OpenClaw detects the
     key and switches to the Sonar transport automatically. Useful if you already
     have OpenRouter billing set up and want to consolidate providers there.
+  </Accordion>
+
+  <Accordion title="Memory embeddings">
+    Perplexity can serve memory embeddings via `/v1/embeddings` (default model:
+    `pplx-embed-v1-0.6b`; `pplx-embed-v1-4b` is also available). It uses
+    `PERPLEXITY_API_KEY` or `memory.search.remote.apiKey`; OpenRouter keys do not
+    work for embeddings.
+
+    ```json5
+    {
+      memory: {
+        search: { provider: "perplexity" },
+      },
+    }
+    ```
+
   </Accordion>
 
   <Accordion title="Integration header">

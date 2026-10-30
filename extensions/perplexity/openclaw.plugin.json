@@ -29,6 +29,7 @@
     }
   },
   "contracts": {
+    "embeddingProviders": ["perplexity"],
     "webSearchProviders": ["perplexity"]
   },
   "configGroups": [
