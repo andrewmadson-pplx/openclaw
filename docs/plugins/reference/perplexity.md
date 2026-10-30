@@ -20,7 +20,7 @@ Adds Perplexity Decisions model provider support to OpenClaw.
 ## Surface
 
 - Providers: `perplexity-decisions`
-- Contracts: `decisionProviders`, `webSearchProviders`
+- Contracts: `decisionProviders`, `embeddingProviders`, `webSearchProviders`
 
 ## Related docs
 
