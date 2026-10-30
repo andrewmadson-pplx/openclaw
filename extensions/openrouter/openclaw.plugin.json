@@ -174,6 +174,206 @@
                 }
               }
             }
+          },
+          {
+            "id": "perplexity/pplx-decider-v1.2",
+            "name": "Perplexity: Decider V1.2",
+            "baseUrl": "https://openrouter.ai/api/v1",
+            "input": ["text", "image"],
+            "contextWindow": 262144,
+            "inference": {
+              "chat": false,
+              "decision": {
+                "protocol": "openrouter-systemone",
+                "input": ["text", "image"],
+                "questions": {
+                  "boolean": {
+                    "probabilities": "boolean",
+                    "abstention": false
+                  },
+                  "choice": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 255
+                  },
+                  "score": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 10
+                  }
+                },
+                "confidence": "provider-specific",
+                "reasoning": {
+                  "modes": ["auto"]
+                },
+                "limits": {
+                  "maxStateAndQuestionTokens": 262144,
+                  "image": {
+                    "maxBytes": 4194304,
+                    "mimeTypes": ["image/png", "image/jpeg"],
+                    "remoteUrls": false
+                  }
+                },
+                "billing": {
+                  "unit": "tokens",
+                  "source": "provider-docs",
+                  "usdPerMillion": {
+                    "input": 0.02,
+                    "output": 0
+                  }
+                }
+              }
+            }
+          },
+          {
+            "id": "perplexity/pplx-decider-flash-v1.2",
+            "name": "Perplexity: Decider Flash V1.2",
+            "baseUrl": "https://openrouter.ai/api/v1",
+            "input": ["text", "image"],
+            "contextWindow": 262144,
+            "inference": {
+              "chat": false,
+              "decision": {
+                "protocol": "openrouter-systemone",
+                "input": ["text", "image"],
+                "questions": {
+                  "boolean": {
+                    "probabilities": "boolean",
+                    "abstention": false
+                  },
+                  "choice": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 255
+                  },
+                  "score": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 10
+                  }
+                },
+                "confidence": "provider-specific",
+                "reasoning": {
+                  "modes": ["auto"]
+                },
+                "limits": {
+                  "maxStateAndQuestionTokens": 262144,
+                  "image": {
+                    "maxBytes": 4194304,
+                    "mimeTypes": ["image/png", "image/jpeg"],
+                    "remoteUrls": false
+                  }
+                },
+                "billing": {
+                  "unit": "tokens",
+                  "source": "provider-docs",
+                  "usdPerMillion": {
+                    "input": 0.01,
+                    "output": 0
+                  }
+                }
+              }
+            }
+          },
+          {
+            "id": "~perplexity/pplx-decider-latest",
+            "name": "Perplexity: Decider (latest)",
+            "baseUrl": "https://openrouter.ai/api/v1",
+            "input": ["text", "image"],
+            "contextWindow": 262144,
+            "inference": {
+              "chat": false,
+              "decision": {
+                "protocol": "openrouter-systemone",
+                "input": ["text", "image"],
+                "questions": {
+                  "boolean": {
+                    "probabilities": "boolean",
+                    "abstention": false
+                  },
+                  "choice": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 255
+                  },
+                  "score": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 10
+                  }
+                },
+                "confidence": "provider-specific",
+                "reasoning": {
+                  "modes": ["auto"]
+                },
+                "limits": {
+                  "maxStateAndQuestionTokens": 262144,
+                  "image": {
+                    "maxBytes": 4194304,
+                    "mimeTypes": ["image/png", "image/jpeg"],
+                    "remoteUrls": false
+                  }
+                },
+                "billing": {
+                  "unit": "tokens",
+                  "source": "provider-docs"
+                }
+              }
+            }
+          },
+          {
+            "id": "~perplexity/pplx-decider-flash-latest",
+            "name": "Perplexity: Decider Flash (latest)",
+            "baseUrl": "https://openrouter.ai/api/v1",
+            "input": ["text", "image"],
+            "contextWindow": 262144,
+            "inference": {
+              "chat": false,
+              "decision": {
+                "protocol": "openrouter-systemone",
+                "input": ["text", "image"],
+                "questions": {
+                  "boolean": {
+                    "probabilities": "boolean",
+                    "abstention": false
+                  },
+                  "choice": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 255
+                  },
+                  "score": {
+                    "probabilities": "categorical",
+                    "abstention": false,
+                    "minOptions": 2,
+                    "maxOptions": 10
+                  }
+                },
+                "confidence": "provider-specific",
+                "reasoning": {
+                  "modes": ["auto"]
+                },
+                "limits": {
+                  "maxStateAndQuestionTokens": 262144,
+                  "image": {
+                    "maxBytes": 4194304,
+                    "mimeTypes": ["image/png", "image/jpeg"],
+                    "remoteUrls": false
+                  }
+                },
+                "billing": {
+                  "unit": "tokens",
+                  "source": "provider-docs"
+                }
+              }
+            }
           }
         ]
       }

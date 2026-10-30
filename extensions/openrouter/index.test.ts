@@ -360,20 +360,23 @@ describe("openrouter provider hooks", () => {
     });
   });
 
-  it.each(["typesafe/jev-1.13", "typesafe/jev-1.14", "openrouter/~typesafe/jev-latest"])(
-    "keeps %s out of dynamic chat resolution",
-    async (modelId) => {
-      loadedCapabilities.mockClear();
-      loadCapabilities.mockClear();
-      const jevProvider = await registerSingleProviderPlugin(openrouterPlugin);
-      const context = dynamicContext(modelId);
+  it.each([
+    "typesafe/jev-1.13",
+    "typesafe/jev-1.14",
+    "openrouter/~typesafe/jev-latest",
+    "perplexity/pplx-decider-v1.2",
+    "openrouter/~perplexity/pplx-decider-latest",
+  ])("keeps %s out of dynamic chat resolution", async (modelId) => {
+    loadedCapabilities.mockClear();
+    loadCapabilities.mockClear();
+    const jevProvider = await registerSingleProviderPlugin(openrouterPlugin);
+    const context = dynamicContext(modelId);
 
-      await jevProvider.prepareDynamicModel?.(context);
-      expect(jevProvider.resolveDynamicModel?.(context)).toBeUndefined();
-      expect(loadCapabilities).not.toHaveBeenCalled();
-      expect(loadedCapabilities).not.toHaveBeenCalled();
-    },
-  );
+    await jevProvider.prepareDynamicModel?.(context);
+    expect(jevProvider.resolveDynamicModel?.(context)).toBeUndefined();
+    expect(loadCapabilities).not.toHaveBeenCalled();
+    expect(loadedCapabilities).not.toHaveBeenCalled();
+  });
 
   it("keeps native OpenRouter namespace ids for capability lookup", async () => {
     loadedCapabilities.mockReset();
