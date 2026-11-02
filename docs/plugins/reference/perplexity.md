@@ -1,5 +1,5 @@
 ---
-summary: "Adds Perplexity Decisions model provider support to OpenClaw."
+summary: "Perplexity provider for Agent API models, decision models and web search."
 read_when:
   - You are installing, configuring, or auditing the perplexity plugin
 title: "Perplexity plugin reference"
@@ -10,7 +10,7 @@ Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
 between the openclaw-plugin-reference:manual-start and
 openclaw-plugin-reference:manual-end comment markers. -->
 
-Adds Perplexity Decisions model provider support to OpenClaw.
+Perplexity provider for Agent API models, decision models and web search.
 
 ## Distribution
 
@@ -19,7 +19,7 @@ Adds Perplexity Decisions model provider support to OpenClaw.
 
 ## Surface
 
-- Providers: `perplexity-decisions`
+- Providers: `perplexity-agent`, `perplexity-decisions`
 - Contracts: `decisionProviders`, `webSearchProviders`
 
 ## Related docs

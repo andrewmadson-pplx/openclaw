@@ -61,6 +61,7 @@ export type ProviderEndpointClass =
   | "opencode-go-native"
   | "azure-openai"
   | "openrouter"
+  | "perplexity-native"
   | "vercel-ai-gateway"
   | "xai-native"
   | "xiaomi-native"
@@ -148,6 +149,7 @@ const ENDPOINT_ATTRIBUTION_PROVIDERS = new Map<ProviderEndpointClass, string>([
   ["openrouter", "openrouter"],
   ["vercel-ai-gateway", "vercel-ai-gateway"],
   ["nvidia-native", "nvidia"],
+  ["perplexity-native", "perplexity"],
   ["google-generative-ai", "google"],
 ]);
 
