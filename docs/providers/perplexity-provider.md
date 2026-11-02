@@ -1,15 +1,17 @@
 ---
-summary: "Perplexity web search provider setup (API key, search modes, filtering)"
+summary: "Perplexity web search and Agent API model provider setup (API key, search modes, filtering)"
 title: "Perplexity"
 read_when:
   - You want to configure Perplexity as a web search provider
+  - You want to run agent turns on Perplexity Agent API models
   - You need the Perplexity API key or OpenRouter proxy setup
 ---
 
 The Perplexity plugin registers a `web_search` provider with two transports: the
 native Perplexity Search API (structured results with filters) and Perplexity
 Sonar chat completions, direct or via OpenRouter (AI-synthesized answers with
-citations).
+citations). It also registers the `perplexity-agent` model provider for the
+Perplexity Agent API.
 
 <Note>
 This page covers the Perplexity **provider** setup. For the Perplexity **tool** (how the agent uses it), see [Perplexity search](/tools/perplexity-search).
@@ -17,7 +19,7 @@ This page covers the Perplexity **provider** setup. For the Perplexity **tool** 
 
 | Property    | Value                                                                  |
 | ----------- | ---------------------------------------------------------------------- |
-| Type        | Web search provider (not a model provider)                             |
+| Type        | Web search provider and `perplexity-agent` model provider              |
 | Auth        | `PERPLEXITY_API_KEY` (native) or `OPENROUTER_API_KEY` (via OpenRouter) |
 | Config path | `plugins.entries.perplexity.config.webSearch.apiKey`                   |
 | Overrides   | `plugins.entries.perplexity.config.webSearch.baseUrl` / `.model`       |
@@ -60,6 +62,21 @@ on the next startup. See [Apply changes and inspect](/plugins/manage-plugins#app
 
   </Step>
 </Steps>
+
+## Agent API models
+
+The `perplexity-agent` provider sends agent turns to the Perplexity Agent API
+(`https://api.perplexity.ai/v1/responses`). It uses `PERPLEXITY_API_KEY` only;
+an OpenRouter key does not authenticate this provider.
+
+```bash
+openclaw onboard --auth-choice perplexity-agent-api-key
+```
+
+The bundled catalog includes `perplexity-agent/openai/gpt-5.5` (default) and
+`perplexity-agent/perplexity/sonar`. Other Agent API models can be added under
+`models.providers.perplexity-agent.models`; see the
+[Agent API model list](https://docs.perplexity.ai/docs/agent-api/models).
 
 ## Search modes
 
