@@ -1,3 +1,4 @@
+import type { EmbeddingProviderCallOptions } from "openclaw/plugin-sdk/embedding-providers";
 import {
   embeddingProviderOwnsDestination,
   normalizeEmbeddingModelWithPrefixes,
@@ -8,7 +9,6 @@ import {
   withRemoteHttpResponse,
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderAdapter,
-  type MemoryEmbeddingProviderCallOptions,
   type MemoryEmbeddingProviderCreateOptions,
 } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
 import {
@@ -111,7 +111,7 @@ export const perplexityMemoryEmbeddingProviderAdapter: MemoryEmbeddingProviderAd
       ) ?? client.headers;
     const embedMany = async (
       input: string[],
-      callOptions?: MemoryEmbeddingProviderCallOptions,
+      callOptions?: EmbeddingProviderCallOptions,
     ): Promise<number[][]> => {
       if (input.length === 0) {
         return [];
@@ -125,7 +125,15 @@ export const perplexityMemoryEmbeddingProviderAdapter: MemoryEmbeddingProviderAd
         init: {
           method: "POST",
           headers: requestHeaders,
-          body: JSON.stringify({ model: client.model, input, encoding_format: "base64_int8" }),
+          body: JSON.stringify({
+            model: client.model,
+            input,
+            encoding_format: "base64_int8",
+            // pplx-embed-v2 models require input_type; v1 models ignore it.
+            ...(client.model.startsWith("pplx-embed-v1")
+              ? {}
+              : { input_type: callOptions?.inputType === "query" ? "query" : "document" }),
+          }),
         },
         onResponse: async (response, sentHeaders) => {
           if (!response.ok) {

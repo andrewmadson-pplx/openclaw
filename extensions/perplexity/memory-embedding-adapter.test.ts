@@ -82,6 +82,52 @@ it("decodes base64 int8 vectors in index order", async () => {
   expect(headers["x-pplx-integration"]).toBeUndefined();
 });
 
+it("labels v2 queries and documents with input_type", async () => {
+  const bodies: unknown[] = [];
+  await withServer(
+    (request, response) => {
+      const chunks: Buffer[] = [];
+      request.on("data", (chunk: Buffer) => chunks.push(chunk));
+      request.on("end", () => {
+        const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as { input: string[] };
+        bodies.push(body);
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(
+          JSON.stringify({
+            data: body.input.map((_, index) => ({ index, embedding: int8([1, 0]) })),
+          }),
+        );
+      });
+    },
+    async (origin) => {
+      const { provider } = await perplexityMemoryEmbeddingProviderAdapter.create({
+        config: {},
+        provider: "perplexity",
+        model: "pplx-embed-v2-context-0.6b",
+        fallback: "none",
+        remote: { apiKey: "fixture-perplexity-key", baseUrl: `${origin}/v1` },
+      });
+      assert(provider, "expected configured Perplexity embedding provider");
+      await provider.embed("question", { inputType: "query" });
+      await provider.embedBatch(["chunk"], { inputType: "document" });
+    },
+  );
+  expect(bodies).toEqual([
+    {
+      model: "pplx-embed-v2-context-0.6b",
+      input: ["question"],
+      encoding_format: "base64_int8",
+      input_type: "query",
+    },
+    {
+      model: "pplx-embed-v2-context-0.6b",
+      input: ["chunk"],
+      encoding_format: "base64_int8",
+      input_type: "document",
+    },
+  ]);
+});
+
 it("partitions custom endpoints without caching the API key", async () => {
   const identity = (await create({ baseUrl: "https://proxy.example.test/v1" })).runtime
     ?.cacheKeyData;

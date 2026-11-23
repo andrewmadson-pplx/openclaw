@@ -116,7 +116,9 @@ Native-only filters return a descriptive error on the chat-completions path.
 
   <Accordion title="Memory embeddings">
     Perplexity can serve memory embeddings via `/v1/embeddings` (default model:
-    `pplx-embed-v1-0.6b`; `pplx-embed-v1-4b` is also available). It uses
+    `pplx-embed-v1-0.6b`; `pplx-embed-v1-4b`, `pplx-embed-v2-context-0.6b` and
+    `pplx-embed-v2-context-9b` are also available). For v2 models, searches are
+    sent as `input_type: "query"` and indexed chunks as `"document"`. It uses
     `PERPLEXITY_API_KEY` or `memory.search.remote.apiKey`; OpenRouter keys do not
     work for embeddings.
 
