@@ -171,6 +171,7 @@ export const pluginRegistrationContractCases = {
   },
   perplexity: {
     pluginId: "perplexity",
+    providerIds: ["perplexity-agent", "perplexity-decisions"],
     webSearchProviderIds: ["perplexity"],
   },
   pixverse: {
