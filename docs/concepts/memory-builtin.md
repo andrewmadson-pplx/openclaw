@@ -125,6 +125,7 @@ openclaw plugins install @openclaw/llama-cpp-provider
 | Ollama            | `ollama`            | Local/self-hosted                   |
 | OpenAI            | `openai`            | Default: `text-embedding-3-small`   |
 | OpenAI-compatible | `openai-compatible` | Generic `/v1/embeddings` endpoint   |
+| Perplexity        | `perplexity`        | Default: `pplx-embed-v1-0.6b`       |
 | Voyage            | `voyage`            |                                     |
 
 Set `memory.search.provider` to switch away from OpenAI.

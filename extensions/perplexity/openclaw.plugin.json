@@ -40,6 +40,9 @@
     }
   },
   "contracts": {
+    "embeddingProviders": [
+      "perplexity"
+    ],
     "webSearchProviders": [
       "perplexity"
     ],
